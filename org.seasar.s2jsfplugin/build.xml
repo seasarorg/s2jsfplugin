@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="Shift_JIS"?>
+<project name="S2JSFPlugin" default="archive">
+	<!--===========================================================-->
+	<!-- 開発用アーカイブの作成 -->
+	<!--===========================================================-->
+	<target name="archive">
+		<zip destfile="../S2JSFPlugin.zip" basedir="../" includes="org.seasar.s2jsfplugin/" 
+			excludes="*/CVS/,*/bin/"/>
+	</target>
+</project>

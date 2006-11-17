@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="fuzzyxml.jar"/>
+	<classpathentry kind="lib" path="commons-jxpath-1.2.jar"/>
+	<classpathentry kind="lib" path="ss_css2.jar"/>
+	<classpathentry kind="lib" path="dtdparser121.jar"/>
+	<classpathentry kind="lib" path="commons-el.jar"/>
+	<classpathentry kind="lib" path="s2-framework-2.4.0-rc-1.jar"/>
+	<classpathentry kind="lib" path="s2-jsf-1.1.0-beta-3.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

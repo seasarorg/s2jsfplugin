@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin
+   id="org.seasar.s2jsfplugin"
+   name="%plugin.name"
+   version="1.1.0"
+   provider-name="%plugin.provider"
+   class="org.seasar.s2jsfplugin.S2JSFPlugin">
+
+   <runtime>
+      <library name="s2jsfplugin.jar">
+         <export name="*"/>
+      </library>
+      <library name="fuzzyxml.jar">
+         <export name="*"/>
+      </library>
+      <library name="commons-jxpath-1.2.jar">
+         <export name="*"/>
+      </library>
+      <library name="ss_css2.jar">
+         <export name="*"/>
+      </library>
+      <library name="dtdparser121.jar">
+         <export name="*"/>
+      </library>
+      <library name="commons-el.jar">
+         <export name="*"/>
+      </library>
+      <library name="s2-framework-2.4.0-rc-1.jar">
+         <export name="*"/>
+      </library>
+      <library name="s2-jsf-1.1.0-beta-3.jar">
+         <export name="*"/>
+      </library>
+   </runtime>
+
+   <requires>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.jface.text"/>
+      <import plugin="org.eclipse.ui.editors"/>
+      <import plugin="org.eclipse.ui.views"/>
+      <import plugin="org.eclipse.ui.workbench.texteditor"/>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.ui.ide"/>
+      <import plugin="org.eclipse.jdt.core"/>
+      <import plugin="org.eclipse.jdt.ui"/>
+   </requires>
+   
+   <!--============================================================-->
+   <!-- Preferences -->
+   <!--============================================================-->
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer class="org.seasar.s2jsfplugin.pref.S2JSFPreferenceInitializer"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="org.seasar.s2jsfplugin.pref.S2JSFPreferencePage"
+            name="%plugin.pref.category"
+            id="org.seasar.s2jsfplugin.pref.category"/>
+      <page
+            class="org.seasar.s2jsfplugin.pref.AssistPreferencePage"
+            category="org.seasar.s2jsfplugin.pref.category"
+            name="%plugin.pref.assist"
+            id="org.seasar.s2jsfplugin.pref.AssistPreferencePage"/>
+   </extension>
+
+   <!--============================================================-->
+   <!-- Editor -->
+   <!--============================================================-->
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="org.seasar.s2jsfplugin.editor.HTMLEditor"
+            icon="icons/html.png"
+            contributorClass="org.seasar.s2jsfplugin.editor.HTMLEditorContributor"
+            name="%plugin.editor.s2jsf.htmleditor"
+            id="org.seasar.s2jsfplugin.editor.HTMLEditor"
+            extensions="html"/>
+      <editor
+            filenames="faces-config.xml"
+            icon="icons/faces_config.gif"
+            class="org.seasar.s2jsfplugin.editor.XMLEditor"
+            default="false"
+            contributorClass="org.seasar.s2jsfplugin.editor.XMLEditorContributor"
+            name="%plugin.editor.s2jsf.faceseditor"
+            id="org.seasar.s2jsfplugin.editor.XMLEditor"/>
+   </extension>
+   
+   <!--============================================================-->
+   <!-- Natute and Builder -->
+   <!--============================================================-->
+   <extension
+         id="S2JSFNature"
+         point="org.eclipse.core.resources.natures">
+      <runtime>
+         <run class="org.seasar.s2jsfplugin.validater.S2JSFNature"/>
+      </runtime>
+      <builder id="org.seasar.s2jsfplugin.validater.S2JSFNature"/>
+   </extension>
+   <extension
+         id="S2JSFBuilder"
+         name="%plugin.builder"
+         point="org.eclipse.core.resources.builders">
+      <builder>
+         <run class="org.seasar.s2jsfplugin.validater.S2JSFBuilder"/>
+      </builder>
+   </extension>
+   <extension
+         id="S2JSFProjectProperty"
+         point="org.eclipse.ui.propertyPages">
+      <page
+            objectClass="org.eclipse.core.resources.IProject"
+            adaptable="true"
+            class="org.seasar.s2jsfplugin.pref.S2JSFProjectPropertyPage"
+            name="%plugin.pref.category"
+            id="org.seasar.s2jsfplugin.pref.S2JSFProjectPropertyPage"/>
+   </extension>
+   
+   <!--============================================================-->
+   <!-- Wizards -->
+   <!--============================================================-->
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            name="%plugin.pref.category"
+            id="org.seasar.s2jsfplugin">
+      </category>
+      <wizard
+            name="%plugin.wizard.HTML"
+            icon="icons/html.png"
+            category="org.seasar.s2jsfplugin"
+            class="org.seasar.s2jsfplugin.wizard.HTMLWizard"
+            id="org.seasar.s2jsfplugin.wizard.HTMLWizard">
+      </wizard>
+   </extension>
+   
+   <!--====================================================-->
+   <!-- Template -->
+   <!--====================================================-->
+   <extension
+         point="org.eclipse.ui.editors.templates">
+      <contextType
+            class="org.seasar.s2jsfplugin.template.HTMLContextType"
+            name="HTML"
+            id="org.seasar.s2jsfplugin.templateContextType.html"/>
+      <!--
+      <include
+            file="templates/templates.xml"/>
+      -->
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="org.seasar.s2jsfplugin.template.HTMLTemplatePreferencePage"
+            category="org.seasar.s2jsfplugin.pref.category"
+            name="%plugin.pref.template"
+            id="org.seasar.s2jsfplugin.template.HTMLTemplatePreferencePage"/>
+   </extension>
+</plugin>
