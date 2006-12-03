@@ -5,7 +5,7 @@ TODO
 	* S2JSFのドキュメントを同梱する。
 	* HTMLエディタでインラインJavaScript、CSSエディタのサポート。
 
-xx xxx xxxx - Version 1.1.0
+3 Dec 2006 - Version 1.1.0
 
 	* HTMLエディタでテンプレートを使用した入力補完機能を実装。
 	* Eclipse 3.0のサポートを終了。Eclipse 3.2の正式サポートを開始。
