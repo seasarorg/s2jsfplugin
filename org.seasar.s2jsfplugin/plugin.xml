@@ -26,10 +26,10 @@
       <library name="commons-el.jar">
          <export name="*"/>
       </library>
-      <library name="s2-framework-2.4.0-rc-1.jar">
+      <library name="s2-jsf-1.1.1.jar">
          <export name="*"/>
       </library>
-      <library name="s2-jsf-1.1.0-beta-3.jar">
+      <library name="s2-framework-2.4.7.jar">
          <export name="*"/>
       </library>
    </runtime>
