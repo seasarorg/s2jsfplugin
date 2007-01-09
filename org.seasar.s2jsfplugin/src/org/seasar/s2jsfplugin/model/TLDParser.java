@@ -18,195 +18,186 @@ package org.seasar.s2jsfplugin.model;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.xml.sax.Attributes;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.DefaultHandler;
 
 /**
- * カスタムタグライブラリのTLDファイルをパースしてTLDInfoオブジェクトを作成します。
+ * カスタムタグライブラリのTLDファイルをパースして<code>TLDInfo</code>オブジェクトを作成します。
  * 
  * @author Naoki Takezoe
  */
 public class TLDParser {
+
+	private String uri = null;
+	private String prefix = null;
+	private ArrayList result = new ArrayList();
+
+	/**
+	 * TLDファイルをパースして<code>TLDInfo</code>オブジェクトとして返却します。
+	 */
 	public TLDInfo parse(InputStream in) throws Exception {
-		SAXParserFactory spfactory = SAXParserFactory.newInstance();
-		spfactory.setValidating(false);
-		SAXParser parser = spfactory.newSAXParser();
-		XMLReader reader = parser.getXMLReader();
-		TLDSAXHandler handler = new TLDSAXHandler();
-		reader.setEntityResolver(new TLDResolver());
-		reader.setContentHandler(handler);
-		reader.parse(new InputSource(in));
-		
-		TLDInfo info = new TLDInfo(handler.getUri(),handler.getResult());
+		DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+		builder.setEntityResolver(new TLDResolver());
+		Document doc = builder.parse(new InputSource(in));
+		Element element = doc.getDocumentElement();
+
+		NodeList nodeList = element.getChildNodes();
+		for (int i = 0; i < nodeList.getLength(); i++) {
+			Node node = nodeList.item(i);
+			if (node instanceof Element) {
+				Element childElement = (Element) nodeList.item(i);
+				String elementName = childElement.getNodeName();
+				if (elementName.equals("tag")) {
+					result.add(parseTagElement(childElement));
+				} else if (elementName.equals("uri")) {
+					uri = getChildText(childElement);
+				} else if (elementName.equals("shortname") || elementName.equals("short-name")) {
+					if (prefix == null) {
+						prefix = getChildText(childElement);
+					}
+				}
+			}
+		}
+
+		return new TLDInfo(uri, result);
+	}
+
+	/**
+	 * tag要素を処理。
+	 */
+	private TagInfo parseTagElement(Element tag) {
+		NodeList children = tag.getChildNodes();
+
+		List attributes = new ArrayList();
+		String name = null;
+		String description = "";
+		boolean hasBody = true;
+
+		for (int j = 0; j < children.getLength(); j++) {
+			Node node = children.item(j);
+			if (node instanceof Element) {
+				Element element = (Element) node;
+				String elementName = element.getNodeName();
+				if (elementName.equals("name")) {
+					name = prefix + ":" + getChildText(element);
+				} else if (elementName.equals("bodycontent") || elementName.equals("body-content")) {
+					hasBody = !getChildText(element).equals("empty");
+				} else if (elementName.equals("description")) {
+					description = wrap(getChildText(element));
+				} else if (elementName.equals("attribute")) {
+					AttributeInfo attrInfo = parseAttributeElement(element);
+					attributes.add(attrInfo);
+				}
+			}
+		}
+
+		TagInfo info = new TagInfo(name, hasBody);
+		info.setDescription(description);
+		for (int i = 0; i < attributes.size(); i++) {
+			info.addAttributeInfo((AttributeInfo) attributes.get(i));
+		}
+
 		return info;
 	}
 	
 	/**
-	 * TLDファイルをパースして補完情報を作成するSAXハンドラ
+	 * attribute要素を処理。
 	 */
-	private static class TLDSAXHandler extends DefaultHandler {
-		
-		private int mode = 0;
-		private String prevTag = null;
-		private boolean hasBody = true;
-		private ArrayList attributes = new ArrayList();
-		private HashMap required = new HashMap();
-		private String uri = null;
-		private StringBuffer tagName = new StringBuffer();
-		private StringBuffer attrName = new StringBuffer();
-		
-		private StringBuffer tagDesc = new StringBuffer();
-		private StringBuffer attrDesc = new StringBuffer();
-		private HashMap attrDescMap = new HashMap();
-		
-		private ArrayList result = new ArrayList();
-		
-		public TLDSAXHandler(){
-		}
-		
-		public String getUri(){
-			return uri;
-		}
-		
-		public List getResult(){
-			return result;
-		}
-		
-		public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-			if(qName.equals("tag")){
-				tagDesc.setLength(0);
-				mode = 1;
-			} else if(qName.equals("attribute")){
-				attrDesc.setLength(0);
-				mode = 2;
-			}
-			prevTag = qName;
-		}
-		
-		public void endElement(String uri, String localName, String qName) throws SAXException {
-			if(qName.equals("tag")){
-				TagInfo info = new TagInfo(tagName.toString(),hasBody);
-				for(int i=0;i<attributes.size();i++){
-					String attrName = (String)attributes.get(i);
-					boolean required = false;
-					if(this.required.get(attrName)!=null){
+	private AttributeInfo parseAttributeElement(Element attr) {
+		NodeList children = attr.getChildNodes();
+
+		String name = null;
+		String description = "";
+		boolean required = false;
+
+		for (int i = 0; i < children.getLength(); i++) {
+			Node node = children.item(i);
+			if (node instanceof Element) {
+				Element element = (Element) node;
+				String elementName = element.getNodeName();
+				if (elementName.equals("name")) {
+					name = getChildText(element);
+				} else if (elementName.equals("description")) {
+					description = wrap(getChildText(element));
+				} else if (elementName.equals("required")) {
+					if (getChildText(element).equals("true")) {
 						required = true;
-					}
-					AttributeInfo attrInfo = new AttributeInfo(attrName,true,AttributeInfo.NONE,required);
-					if(attrDescMap.get(attrName)!=null){
-						attrInfo.setDescription(wrap((String)attrDescMap.get(attrName)));
-					}
-					info.addAttributeInfo(attrInfo);
-				}
-				if(tagDesc.length() > 0){
-					info.setDescription(wrap(tagDesc.toString()));
-				}
-				result.add(info);
-				mode    = 0;
-				prevTag = null;
-				hasBody = true;
-				tagName.setLength(0);
-				tagDesc.setLength(0);
-				attrDescMap.clear();
-				required.clear();
-				attributes.clear();
-			} else if(qName.equals("name") && mode==2){
-				attributes.add(attrName.toString());
-				attrName.setLength(0);
-			} else if(qName.equals("description") && mode==2){
-				if(attrDesc.length() > 0){
-					attrDescMap.put(attributes.get(attributes.size()-1), attrDesc.toString());
-					attrDesc.setLength(0);
-				}
-			}
-		}
-		
-		public void characters(char[] ch, int start, int length) throws SAXException {
-			StringBuffer sb = new StringBuffer();
-			for(int i=start;i<start+length;i++){
-				sb.append(ch[i]);
-			}
-			String value = sb.toString().trim();
-			if(!value.equals("")){
-				if(prevTag.equals("name")){
-					if(mode==1){
-						tagName.append(value);
 					} else {
-						attrName.append(value);
-					}
-				} else if(prevTag.equals("bodycontent")){
-					if(value.equals("empty")){
-						hasBody = false;
-					} else {
-						hasBody = true;
-					}
-				} else if(prevTag.equals("required")){
-					if(value.equals("true")){
-						required.put(attributes.get(attributes.size()-1),"true");
-					}
-				} else if(prevTag.equals("uri")){
-					uri = value;
-				} else if(prevTag.equals("description")){
-					if(mode==1){
-						tagDesc.append(value);
-					} else if(mode==2){
-						attrDesc.append(value);
+						required = false;
 					}
 				}
 			}
 		}
-		
-		/**
-		 * 文字列を40文字で折り返します。
-		 * 
-		 * @param text 文字列
-		 * @return 40文字で折り返された文字列
-		 */
-		private static String wrap(String text){
-			StringBuffer sb = new StringBuffer();
-			int word = 0;
-			for(int i=0;i<text.length();i++){
-				char c = text.charAt(i);
-				if(word > 40){
-					if(c==' ' || c== '\t'){
-						sb.append('\n');
-						word = 0;
-						continue;
-					}
-				}
-				sb.append(c);
-				word++;
+
+		AttributeInfo attrInfo = new AttributeInfo(name, true,
+				AttributeInfo.NONE, required);
+		attrInfo.setDescription(description);
+		return attrInfo;
+	}
+
+	/**
+	 * <code>Element</code>ノード配下のテキストを取得する。
+	 */
+	private static String getChildText(Element element) {
+		StringBuffer sb = new StringBuffer();
+		NodeList children = element.getChildNodes();
+		for (int i = 0; i < children.getLength(); i++) {
+			Node node = children.item(i);
+			if (node instanceof Text) {
+				sb.append(node.getNodeValue());
 			}
-			return sb.toString();
 		}
+		return sb.toString().trim().replaceAll("\\s+", " ");
 	}
 	
+	/**
+	 * 文字列を<strong>約</strong>40文字で折り返す。
+	 */
+	private static String wrap(String text) {
+		StringBuffer sb = new StringBuffer();
+		int word = 0;
+		for (int i = 0; i < text.length(); i++) {
+			char c = text.charAt(i);
+			if (word > 40) {
+				if (c == ' ' || c == '\t') {
+					sb.append('\n');
+					word = 0;
+					continue;
+				}
+			}
+			sb.append(c);
+			word++;
+		}
+		return sb.toString();
+	}
+
 	/**
 	 * TLDファイルのDTDをローカルから参照するためのEntityResolver
 	 */
 	private static class TLDResolver implements EntityResolver {
-		public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
-			if(systemId!=null && systemId.equals("http://java.sun.com/j2ee/dtds/web-jsptaglibrary_1_1.dtd")){
+		public InputSource resolveEntity(String publicId, String systemId)
+				throws SAXException, IOException {
+			if (systemId != null && systemId.equals("http://java.sun.com/j2ee/dtds/web-jsptaglibrary_1_1.dtd")) {
 				InputStream in = getClass().getResourceAsStream("/DTD/web-jsptaglibrary_1_1.dtd");
 				return new InputSource(in);
 			}
-			if(systemId!=null && systemId.equals("http://java.sun.com/dtd/web-jsptaglibrary_1_2.dtd")){
+			if (systemId != null && systemId.equals("http://java.sun.com/dtd/web-jsptaglibrary_1_2.dtd")) {
 				InputStream in = getClass().getResourceAsStream("/DTD/web-jsptaglibrary_1_2.dtd");
 				return new InputSource(in);
 			}
 			return null;
 		}
 	}
-	
 
 }
