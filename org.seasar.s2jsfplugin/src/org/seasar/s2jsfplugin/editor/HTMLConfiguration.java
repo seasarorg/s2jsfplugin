@@ -18,6 +18,7 @@ package org.seasar.s2jsfplugin.editor;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.DocumentEvent;
+import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
@@ -49,6 +50,7 @@ public class HTMLConfiguration extends SourceViewerConfiguration {
 	
 	private IEditorPart editor;
 	private HTMLDoubleClickStrategy doubleClickStrategy;
+	private HTMLAutoEditStrategy autoEditStrategy;
 	private HTMLScanner scanner;
 	private HTMLTagScanner tagScanner;
 	private RuleBasedScanner commentScanner;
@@ -61,6 +63,23 @@ public class HTMLConfiguration extends SourceViewerConfiguration {
 	public HTMLConfiguration(ColorProvider colorProvider) {
 		this.colorProvider = colorProvider;
 	}
+	
+	/**
+	 * @since 1.1.1
+	 */
+	protected HTMLAutoEditStrategy createAutoEditStrategy(){
+		return new HTMLAutoEditStrategy();
+	}
+	
+	/**
+	 * @since 1.1.1
+	 */
+	public final IAutoEditStrategy[] getAutoEditStrategies(ISourceViewer sourceViewer, String contentType) {
+		if(this.autoEditStrategy==null){
+			this.autoEditStrategy = createAutoEditStrategy();
+		}
+		return new IAutoEditStrategy[]{ this.autoEditStrategy };
+	}	
 	
 	public void setEditorPart(IEditorPart editor){
 		this.editor = editor;
