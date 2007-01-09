@@ -9,6 +9,8 @@ TODO
 x xxx 2007 - Version 1.1.1
 
     * TLDパース処理のバグ修正。
+    * HTMLエディタとfaces-config.xmlエディタに自動編集機能を追加。
+      コメントとCDATAセクションの入力が補助されます。
 
 3 Dec 2006 - Version 1.1.0
 
