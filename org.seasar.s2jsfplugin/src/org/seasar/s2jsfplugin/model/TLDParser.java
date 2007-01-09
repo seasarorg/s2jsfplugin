@@ -40,7 +40,6 @@ import org.xml.sax.SAXException;
 public class TLDParser {
 
 	private String uri = null;
-	private String prefix = null;
 	private ArrayList result = new ArrayList();
 
 	/**
@@ -62,10 +61,6 @@ public class TLDParser {
 					result.add(parseTagElement(childElement));
 				} else if (elementName.equals("uri")) {
 					uri = getChildText(childElement);
-				} else if (elementName.equals("shortname") || elementName.equals("short-name")) {
-					if (prefix == null) {
-						prefix = getChildText(childElement);
-					}
 				}
 			}
 		}
@@ -90,7 +85,7 @@ public class TLDParser {
 				Element element = (Element) node;
 				String elementName = element.getNodeName();
 				if (elementName.equals("name")) {
-					name = prefix + ":" + getChildText(element);
+					name = getChildText(element);
 				} else if (elementName.equals("bodycontent") || elementName.equals("body-content")) {
 					hasBody = !getChildText(element).equals("empty");
 				} else if (elementName.equals("description")) {
