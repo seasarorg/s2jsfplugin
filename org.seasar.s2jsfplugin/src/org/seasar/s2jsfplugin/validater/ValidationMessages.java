@@ -32,4 +32,5 @@ public class ValidationMessages {
 	public static final String NOT_SPECIFIED    = "Validation.Message.NotSpecified";
 	public static final String NOT_EXISTS       = "Validation.Message.NotExists";
 	public static final String INVALID_EL       = "Validation.Message.InvalidEL";
+	public static final String TLD_NOT_FOUND    = "Validation.Message.TLDNotFound";
 }

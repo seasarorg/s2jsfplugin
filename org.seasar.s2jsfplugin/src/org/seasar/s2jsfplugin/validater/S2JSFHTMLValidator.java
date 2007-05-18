@@ -173,6 +173,10 @@ public class S2JSFHTMLValidator extends AbstractS2JSFValidator {
 			return;
 		}
 		TLDInfo tld = getS2JSFProject().getTLDInfo(taglib.getUri());
+		if(tld==null){
+			createAttributeValueMarker(injectAttr,createMessage(ValidationMessages.TLD_NOT_FOUND,taglib.getUri()));
+			return;
+		}
 		TagInfo tag = tld.getTagInfo(dim[1]);
 		if(tag==null){
 			createAttributeValueMarker(injectAttr,createMessage(ValidationMessages.TAGLIB_NOT_EXIST,inject));

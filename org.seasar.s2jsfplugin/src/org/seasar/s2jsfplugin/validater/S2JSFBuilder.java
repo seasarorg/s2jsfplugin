@@ -16,6 +16,7 @@
 package org.seasar.s2jsfplugin.validater;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Map;
 
 import org.eclipse.core.resources.IContainer;
@@ -49,6 +50,8 @@ public class S2JSFBuilder extends IncrementalProjectBuilder {
 
 	protected IProject[] build(int kind, Map args, IProgressMonitor monitor) throws CoreException {
 		
+		long start = new Date().getTime();
+		
 		S2JSFProject project = new S2JSFProject(JavaCore.create(getProject()));
 		S2JSFProjectParams params = new S2JSFProjectParams(getProject());
 		
@@ -63,6 +66,10 @@ public class S2JSFBuilder extends IncrementalProjectBuilder {
 				validateFile(project,path, params);
 			}
 		}
+		
+		long end = new Date().getTime();
+		System.out.println("S2JSF:" + (end - start) + "msec.");
+		
 		getProject().refreshLocal(IResource.DEPTH_INFINITE,monitor);
 		return null;
 	}
