@@ -18,10 +18,14 @@ package org.seasar.s2jsfplugin.model;
 import java.io.InputStream;
 import java.util.HashMap;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.seasar.s2jsfplugin.Util;
+import org.seasar.s2jsfplugin.pref.S2JSFProjectParams;
 
 /**
  * S2JSFプロジェクトの各種情報にアクセスするためのクラス。
@@ -106,6 +110,22 @@ public class S2JSFProject {
 			TLDInfo info = new TLDParser().parse(in);
 			tldMap.put(info.getUri(),info);
 			in.close();
+		}
+		
+		// WEB-INF/tldsをスキャン
+		S2JSFProjectParams params = new S2JSFProjectParams(this.project.getProject());
+		IResource resource = this.project.getProject().findMember(new Path(params.getRoot() + "/WEB-INF/tlds"));
+		if(resource!=null && resource.exists() && resource instanceof IContainer){
+			IContainer container = (IContainer) resource;
+			IResource[] children = container.members();
+			for(int i=0;i<children.length;i++){
+				if(children[i] instanceof IFile && children[i].getName().endsWith(".tld")){
+					InputStream in = ((IFile) children[i]).getContents();
+					TLDInfo info = new TLDParser().parse(in);
+					tldMap.put(info.getUri(),info);
+					in.close();
+				}
+			}
 		}
 	}
 	
