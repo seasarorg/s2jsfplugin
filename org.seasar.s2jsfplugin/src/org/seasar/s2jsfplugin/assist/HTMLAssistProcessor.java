@@ -27,6 +27,7 @@ import jp.aonir.fuzzyxml.FuzzyXMLParser;
 import jp.aonir.fuzzyxml.XPath;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.CompletionProposal;
 import org.eclipse.jface.text.contentassist.ContextInformation;
@@ -265,7 +266,7 @@ public class HTMLAssistProcessor extends HTMLTemplateAssistProcessor /*implement
 					assists.add( new AssistInfo(
 							"#{" + preWord + beans[i].getBeanName(),
 							beans[i].getBeanName() + " - " + beans[i].getClassName(),
-							classImage));
+							classImage, beans[i].getJavadoc()));
 				}
 				for(int i=0;i<IMPLICIT_OBJECTS.length;i++){
 					assists.add( new AssistInfo(
@@ -280,7 +281,7 @@ public class HTMLAssistProcessor extends HTMLTemplateAssistProcessor /*implement
 						assists.add( new AssistInfo(
 								"#{" + preWord + propBean.getBeanName(),
 								propBean.getBeanName() + " - " + propBean.getClassName(),
-								classImage));
+								classImage,propBean.getJavadoc()));
 					}
 				}
 				return (AssistInfo[])assists.toArray(new AssistInfo[assists.size()]);
@@ -314,7 +315,7 @@ public class HTMLAssistProcessor extends HTMLTemplateAssistProcessor /*implement
 				info[j] = new AssistInfo(
 						"#{" + pre + "." + beanProps[j].getPropertyName(),
 						beanProps[j].getPropertyName() + " - " + beanProps[j].getPropertyType(),
-						fieldImage);
+						fieldImage, beanProps[j].getJavadoc());
 			}
 			return info;
 		} else {
@@ -325,23 +326,23 @@ public class HTMLAssistProcessor extends HTMLTemplateAssistProcessor /*implement
 					AssistInfo info = new AssistInfo(
 							"#{" + pre + "." + beanProps[j].getPropertyName(),
 							beanProps[j].getPropertyName() + " - " + beanProps[j].getPropertyType(),
-							fieldImage);
+							fieldImage, beanProps[j].getJavadoc());
 					list.add(info);
 				}
-				String[] methods = new String[0];
+				IMethod[] methods = new IMethod[0];
 				if(type==JSFTagDefinition.ACTION){
-					methods = bean.getActionMethodNames();
+					methods = bean.getActionMethods();
 				} else if(type==JSFTagDefinition.ACTION_LISTENER){
-					methods = bean.getActionListenerMethodNames();
+					methods = bean.getActionListenerMethods();
 				} else if(type==JSFTagDefinition.CHANGE_LISTENER){
-					methods = bean.getValueChangeListenerMethodNames();
+					methods = bean.getValueChangeListenerMethods();
 				} else if(type==JSFTagDefinition.VALIDATER){
-					methods = bean.getValidaterMethodNames();
+					methods = bean.getValidaterMethods();
 				}
 				for(int i=0;i<methods.length;i++){
-					AssistInfo info = new AssistInfo("#{" + pre + "." + methods[i],
-							methods[i],
-							methodImage);
+					AssistInfo info = new AssistInfo("#{" + pre + "." + methods[i].getElementName(),
+							methods[i].getElementName(),
+							methodImage, Util.extractJavadoc(methods[i], null));
 					list.add(info);
 				}
 				return (AssistInfo[])list.toArray(new AssistInfo[list.size()]);

@@ -15,6 +15,7 @@
  */
 package org.seasar.s2jsfplugin.model;
 
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.seasar.s2jsfplugin.Util;
 
@@ -26,11 +27,21 @@ public class ManagedBeanProperty {
 	private IType  parent;
 	private String propertyName;
 	private String propertyType;
+	private IMethod method;
 	
-	public ManagedBeanProperty(IType parent,String propertyName,String propertyType){
+	public ManagedBeanProperty(IType parent,String propertyName,String propertyType,IMethod method){
 		this.parent = parent;
 		this.propertyName = propertyName;
 		this.propertyType = propertyType;
+		this.method = method;
+	}
+	
+	public String getJavadoc(){
+		try {
+			return Util.extractJavadoc(method, null);
+		} catch(Exception ex){
+			return null;
+		}
 	}
 	
 	/**

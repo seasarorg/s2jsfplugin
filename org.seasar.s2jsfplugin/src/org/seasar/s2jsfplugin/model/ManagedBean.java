@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.seasar.s2jsfplugin.Util;
 
 /**
  * マネージド・ビーンの情報を格納するクラス。
@@ -49,6 +50,14 @@ public class ManagedBean {
 		this.className = className;
 		this.beanName  = beanName;
 		this.beanScope = beanScope;
+	}
+	
+	public String getJavadoc(){
+		try {
+			return Util.extractJavadoc(project.findType(className), null);
+		} catch(Exception ex){
+			return null;
+		}
 	}
 	
 	public int getType(){
@@ -132,7 +141,7 @@ public class ManagedBean {
 					String propName = getPropertyName(name);
 					
 					if(name.startsWith("get") || name.startsWith("is") || set.contains(propName + "(" + propType + ")")){
-						list.add(new ManagedBeanProperty(type,propName,propType));
+						list.add(new ManagedBeanProperty(type,propName,propType,methods[i]));
 					} else {
 						set.add(propName + "(" + propType + ")");
 					}
@@ -147,7 +156,7 @@ public class ManagedBean {
 	/**
 	 * バリデータとして使用可能なメソッドの一覧を取得します。
 	 */
-	public String[] getValidaterMethodNames(){
+	public IMethod[] getValidaterMethods(){
 		try {
 			IMethod[] methods = getMethods();
 			ArrayList list = new ArrayList();
@@ -157,20 +166,19 @@ public class ManagedBean {
 				   (args[0].equals("QFacesContext;") || args[0].equals("Ljavax.faces.context.FacesContext;")) && 
 				   (args[1].equals("QUIComponent;")  || args[1].equals("Ljavax.faces.component.UIComponent;")) && 
 				   (args[2].equals("QObject;")       || args[2].equals("Ljava.lang.Object;"))){
-					String name = methods[i].getElementName();
-					list.add(name);
+					list.add(methods[i]);
 				}
 			}
-			return (String[])list.toArray(new String[list.size()]);
+			return (IMethod[])list.toArray(new IMethod[list.size()]);
 		} catch(Exception ex){
-			return new String[0];
+			return new IMethod[0];
 		}
 	}
 	
 	public boolean hasValidaterMethod(String methodName){
-		String[] methods = getValidaterMethodNames();
+		IMethod[] methods = getValidaterMethods();
 		for(int i=0;i<methods.length;i++){
-			if(methods[i].equals(methodName)){
+			if(methods[i].getElementName().equals(methodName)){
 				return true;
 			}
 		}
@@ -180,7 +188,7 @@ public class ManagedBean {
 	/**
 	 * 値変更リスナとして使用可能なメソッドの一覧を取得します。
 	 */
-	public String[] getValueChangeListenerMethodNames(){
+	public IMethod[] getValueChangeListenerMethods(){
 		try {
 			IMethod[] methods = getMethods();
 			ArrayList list = new ArrayList();
@@ -188,20 +196,19 @@ public class ManagedBean {
 				String[] args = methods[i].getParameterTypes();
 				if(methods[i].getReturnType().equals("V") && args.length==1 && 
 						(args[0].equals("QValueChangeEvent;") || args[0].equals("Qjavax.faces.event.ValueChangeEvent;"))){
-					String name = methods[i].getElementName();
-					list.add(name);
+					list.add(methods[i]);
 				}
 			}
-			return (String[])list.toArray(new String[list.size()]);
+			return (IMethod[])list.toArray(new IMethod[list.size()]);
 		} catch(Exception ex){
-			return new String[0];
+			return new IMethod[0];
 		}
 	}
 
 	public boolean hasValueChangeListenerMethod(String methodName){
-		String[] methods = getValueChangeListenerMethodNames();
+		IMethod[] methods = getValueChangeListenerMethods();
 		for(int i=0;i<methods.length;i++){
-			if(methods[i].equals(methodName)){
+			if(methods[i].getElementName().equals(methodName)){
 				return true;
 			}
 		}
@@ -211,7 +218,7 @@ public class ManagedBean {
 	/**
 	 * アクションリスナとして使用可能なメソッドの一覧を取得します。
 	 */
-	public String[] getActionListenerMethodNames(){
+	public IMethod[] getActionListenerMethods(){
 		try {
 			IMethod[] methods = getMethods();
 			ArrayList list = new ArrayList();
@@ -219,20 +226,19 @@ public class ManagedBean {
 				String[] args = methods[i].getParameterTypes();
 				if(methods[i].getReturnType().equals("V") && args.length==1 && 
 						(args[0].equals("QActionEvent;") || args[0].equals("Qjavax.faces.event.ActionEvent;"))){
-					String name = methods[i].getElementName();
-					list.add(name);
+					list.add(methods[i]);
 				}
 			}
-			return (String[])list.toArray(new String[list.size()]);
+			return (IMethod[])list.toArray(new IMethod[list.size()]);
 		} catch(Exception ex){
-			return new String[0];
+			return new IMethod[0];
 		}
 	}
 
 	public boolean hasActionListenerMethod(String methodName){
-		String[] methods = getActionListenerMethodNames();
+		IMethod[] methods = getActionListenerMethods();
 		for(int i=0;i<methods.length;i++){
-			if(methods[i].equals(methodName)){
+			if(methods[i].getElementName().equals(methodName)){
 				return true;
 			}
 		}
@@ -242,27 +248,26 @@ public class ManagedBean {
 	/**
 	 * アクションメソッドとして使用可能なメソッドの一覧を取得します。
 	 */
-	public String[] getActionMethodNames(){
+	public IMethod[] getActionMethods(){
 		try {
 			IMethod[] methods = getMethods();
 			ArrayList list = new ArrayList();
 			for(int i=0;i<methods.length;i++){
 				if((methods[i].getReturnType().equals("QString;") || methods[i].getReturnType().equals("V")) && 
 				    methods[i].getParameterTypes().length==0){
-					String name = methods[i].getElementName();
-					list.add(name);
+					list.add(methods[i]);
 				}
 			}
-			return (String[])list.toArray(new String[list.size()]);
+			return (IMethod[])list.toArray(new IMethod[list.size()]);
 		} catch(Exception ex){
-			return new String[0];
+			return new IMethod[0];
 		}
 	}
 	
 	public boolean hasActionMethod(String methodName){
-		String[] methods = getActionMethodNames();
+		IMethod[] methods = getActionMethods();
 		for(int i=0;i<methods.length;i++){
-			if(methods[i].equals(methodName)){
+			if(methods[i].getElementName().equals(methodName)){
 				return true;
 			}
 		}

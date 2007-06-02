@@ -19,6 +19,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,11 +35,15 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.ui.JavadocContentAccess;
 import org.seasar.s2jsfplugin.model.ManagedBean;
 import org.seasar.s2jsfplugin.model.ManagedBeanProperty;
 import org.seasar.s2jsfplugin.model.S2JSFProject;
@@ -50,6 +55,45 @@ import org.seasar.s2jsfplugin.model.S2JSFProject;
  * @author Naoki Takezoe
  */
 public class Util {
+	
+	/**
+	 * 引数で指定した<code>IMember</code>のJavadocを取得します。
+	 * 
+	 * @param member Javadocを取得する要素
+	 * @param monitor プログレスモニタもしくは<code>null</code>
+	 * @return 取得したJavadoc。Javadocを取得できない場合は<code>null</code>を返します。
+	 */
+	public static String extractJavadoc(IMember member, IProgressMonitor monitor) throws JavaModelException, IOException {
+		if (member != null) {
+			Reader reader=  JavadocContentAccess.getContentReader(member, true);
+			if (reader != null){
+				String info = getStringFromReader(reader);
+//				if (info != null && info.length() > 0) {
+//					StringBuffer buffer= new StringBuffer();
+//					HTMLPrinter.insertPageProlog(buffer, 0);
+//					buffer.append(info);
+//					HTMLPrinter.addPageEpilog(buffer);
+//					info= buffer.toString();
+//				}
+				return info;
+			}
+		}
+		return null;
+	}
+	
+	private static String getStringFromReader(Reader reader) {
+		StringBuffer buf= new StringBuffer();
+		char[] buffer= new char[1024];
+		int count;
+		try {
+			while ((count= reader.read(buffer)) != -1)
+				buf.append(buffer, 0, count);
+		} catch (IOException e) {
+			return null;
+		}
+		return buf.toString();
+	}
+	
 	
 	/**
 	 * HTMLタグのエスケープを行います。以下の変換を行います。
