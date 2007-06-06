@@ -1,6 +1,8 @@
-package org.seasar.s2jsfplugin;
+package org.seasar.s2jsfplugin.test;
 
 import junit.framework.TestCase;
+
+import org.seasar.s2jsfplugin.Util;
 
 public class UtilTest extends TestCase {
 
