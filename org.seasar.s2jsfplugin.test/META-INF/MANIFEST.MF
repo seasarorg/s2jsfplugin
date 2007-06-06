@@ -8,6 +8,5 @@ Bundle-Localization: plugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.seasar.s2jsfplugin,
- org.junit,
- org.pluginbuilder.autotestsuite
+ org.junit
 Eclipse-LazyStart: true
