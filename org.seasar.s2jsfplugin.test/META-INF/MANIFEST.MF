@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: S2JSF Test Plug-in
+Bundle-SymbolicName: org.seasar.s2jsfplugin.test
+Bundle-Version: 1.0.0
+Bundle-Activator: org.seasar.s2jsfplugin.test.S2JSFTestPlugin
+Bundle-Localization: plugin
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.seasar.s2jsfplugin,
+ org.junit,
+ org.pluginbuilder.autotestsuite
+Eclipse-LazyStart: true
