@@ -5,7 +5,7 @@
       version="1.0.0">
 
    <description url="http://www.example.com/description">
-     S2JSF Plugin Test Project
+      S2JSF Plugin Test Project
    </description>
 
    <license url="http://www.apache.org/licenses/LICENSE-2.0">
@@ -216,7 +216,7 @@ limitations under the License.
          id="org.seasar.s2jsfplugin.test"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.0.0"
          unpack="false"/>
 
 </feature>
