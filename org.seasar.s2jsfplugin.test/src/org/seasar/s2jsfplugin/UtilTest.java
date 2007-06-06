@@ -1,4 +1,4 @@
-package org.seasar.s2jsfplugin.test;
+package org.seasar.s2jsfplugin;
 
 import junit.framework.TestCase;
 
