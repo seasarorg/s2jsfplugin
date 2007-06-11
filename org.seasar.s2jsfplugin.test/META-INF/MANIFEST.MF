@@ -10,3 +10,4 @@ Require-Bundle: org.eclipse.ui,
  org.seasar.s2jsfplugin,
  org.junit
 Eclipse-LazyStart: true
+Bundle-ClassPath: bin/
