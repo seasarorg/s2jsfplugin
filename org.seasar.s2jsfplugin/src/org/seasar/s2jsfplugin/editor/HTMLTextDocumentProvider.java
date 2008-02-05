@@ -42,7 +42,9 @@ public class HTMLTextDocumentProvider extends TextFileDocumentProvider {
 						HTMLPartitionScanner.HTML_TAG,
 						HTMLPartitionScanner.HTML_COMMENT,
 						HTMLPartitionScanner.HTML_SCRIPT,
-						HTMLPartitionScanner.HTML_DOCTYPE});
+						HTMLPartitionScanner.HTML_DOCTYPE,
+						HTMLPartitionScanner.JAVASCRIPT,
+						HTMLPartitionScanner.HTML_CSS});
 			partitioner.connect(document);
 			document.setDocumentPartitioner(partitioner);
 		}

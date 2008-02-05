@@ -56,6 +56,8 @@ public class HTMLConfiguration extends SourceViewerConfiguration {
 	private RuleBasedScanner commentScanner;
 	private RuleBasedScanner scriptScanner;
 	private RuleBasedScanner doctypeScanner;
+	private RuleBasedScanner javaScriptScanner;
+	private RuleBasedScanner cssScanner;
 	private ColorProvider colorProvider;
 	private ContentAssistant assistant;
 	private HTMLAssistProcessor processor;
@@ -91,7 +93,9 @@ public class HTMLConfiguration extends SourceViewerConfiguration {
 			HTMLPartitionScanner.HTML_COMMENT,
 			HTMLPartitionScanner.HTML_TAG,
 			HTMLPartitionScanner.HTML_SCRIPT,
-			HTMLPartitionScanner.HTML_DOCTYPE};
+			HTMLPartitionScanner.HTML_DOCTYPE,
+			HTMLPartitionScanner.JAVASCRIPT,
+			HTMLPartitionScanner.HTML_CSS};
 	}
 	
 	public HTMLAssistProcessor getAssistProcessor(){
@@ -185,6 +189,32 @@ public class HTMLConfiguration extends SourceViewerConfiguration {
 		return doctypeScanner;
 	}
 	
+	/**
+	 * Creates or Returns the scanner for inner JavaScript.
+	 */
+	protected RuleBasedScanner getJavaScriptScanner() {
+		if (javaScriptScanner == null) {
+			javaScriptScanner = new InnerJavaScriptScanner(colorProvider);
+			javaScriptScanner.setDefaultReturnToken(
+					colorProvider.getToken(S2JSFPlugin.PREF_COLOR_FG));
+		}
+		return javaScriptScanner;
+	}
+	
+	/**
+	 * Creates or Returns the scanner for inner CSS.
+	 */
+	protected RuleBasedScanner getCSSScanner() {
+		if (cssScanner == null) {
+			cssScanner = new InnerCSSScanner(colorProvider);
+			cssScanner.setDefaultReturnToken(
+					colorProvider.getToken(S2JSFPlugin.PREF_COLOR_FG));
+		}
+		return cssScanner;
+	}
+	
+
+	
 	public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer) {
 		PresentationReconciler reconciler = new PresentationReconciler();
 
@@ -210,6 +240,14 @@ public class HTMLConfiguration extends SourceViewerConfiguration {
 		reconciler.setDamager(dr, HTMLPartitionScanner.HTML_DOCTYPE);
 		reconciler.setRepairer(dr, HTMLPartitionScanner.HTML_DOCTYPE);
 		
+		dr = new JavaScriptDamagerRepairer(getJavaScriptScanner());
+		reconciler.setDamager(dr, HTMLPartitionScanner.JAVASCRIPT);
+		reconciler.setRepairer(dr, HTMLPartitionScanner.JAVASCRIPT);
+		
+		dr = new JavaScriptDamagerRepairer(getCSSScanner());
+		reconciler.setDamager(dr, HTMLPartitionScanner.HTML_CSS);
+		reconciler.setRepairer(dr, HTMLPartitionScanner.HTML_CSS);
+		
 		return reconciler;
 	}
 	
@@ -232,6 +270,37 @@ public class HTMLConfiguration extends SourceViewerConfiguration {
 				if(nextEnd >= 0 && nextEnd > end){
 					end = nextEnd;
 				}
+				int end2 = e.getOffset() + (e.getText() == null ? e.getLength() : e.getText().length());
+				if(end == -1){
+					end = source.length();
+				} else if(end2 > end){
+					end = end2;
+				} else {
+					end++;
+				}
+				
+				return new Region(start, end - start);
+			}
+			return partition;
+		}
+		
+	}
+
+	private class JavaScriptDamagerRepairer extends DefaultDamagerRepairer {
+		
+		public JavaScriptDamagerRepairer(ITokenScanner scanner) {
+			super(scanner);
+		}
+		
+		// TODO This method works with 3.0 and 3.1.2 but does't work well with Eclipse 3.1.1.
+		public IRegion getDamageRegion(ITypedRegion partition, DocumentEvent e, boolean documentPartitioningChanged) {
+			if (!documentPartitioningChanged) {
+				String source = fDocument.get();
+				int start = source.substring(0, e.getOffset()).lastIndexOf("/*");
+				if(start == -1){
+					start = 0;
+				}
+				int end = source.indexOf("*/", e.getOffset());
 				int end2 = e.getOffset() + (e.getText() == null ? e.getLength() : e.getText().length());
 				if(end == -1){
 					end = source.length();

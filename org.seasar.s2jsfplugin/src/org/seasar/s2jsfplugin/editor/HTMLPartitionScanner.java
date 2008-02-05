@@ -29,6 +29,8 @@ public class HTMLPartitionScanner extends RuleBasedPartitionScanner {
 	public final static String HTML_TAG     = "__html_tag";
 	public final static String HTML_SCRIPT  = "__html_script";
 	public final static String HTML_DOCTYPE = "__html_doctype";
+	public final static String JAVASCRIPT   = "__html_javascript";
+	public final static String HTML_CSS     = "__html_css";
 	
 	public HTMLPartitionScanner() {
 
@@ -36,15 +38,19 @@ public class HTMLPartitionScanner extends RuleBasedPartitionScanner {
 		IToken htmlTag     = new Token(HTML_TAG);
 		IToken htmlScript  = new Token(HTML_SCRIPT);
 		IToken htmlDoctype = new Token(HTML_DOCTYPE);
+		IToken javaScript  = new Token(JAVASCRIPT);
+		IToken htmlCss     = new Token(HTML_CSS);
 
-		IPredicateRule[] rules = new IPredicateRule[6];
+		IPredicateRule[] rules = new IPredicateRule[8];
 
 		rules[0] = new MultiLineRule("<!--"      , "-->" , htmlComment);
 		rules[1] = new MultiLineRule("<!DOCTYPE" , ">"   , htmlDoctype);
 		rules[2] = new MultiLineRule("<%"        , "%>"  , htmlScript);
 		rules[3] = new MultiLineRule("<?xml"     , "?>"  , htmlDoctype);
 		rules[4] = new MultiLineRule("<![CDATA[" , "]]>" , htmlDoctype);
-		rules[5] = new HTMLTagRule(htmlTag);
+		rules[5] = new MultiLineRule("<script", "</script>", javaScript);
+		rules[6] = new MultiLineRule("<style", "</style>", htmlCss);
+		rules[7] = new HTMLTagRule(htmlTag);
 		
 		setPredicateRules(rules);
 	}

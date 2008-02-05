@@ -6,6 +6,11 @@ TODO
 	* HTMLエディタでインラインJavaScript、CSSエディタのサポート。
 	* HTMLエディタ、XMLエディタでの自動編集機能
 
+xx xxx 2008 - Version 1.1.2
+
+    * a@href属性でa@name属性に記述されたアンカーを補完できるようにした。
+    * HTML内のCSSとJavaScriptを強調表示できるようにした。
+
 18 Jun 2007 - Version 1.1.1
 
     * TLDパース処理のバグ修正。

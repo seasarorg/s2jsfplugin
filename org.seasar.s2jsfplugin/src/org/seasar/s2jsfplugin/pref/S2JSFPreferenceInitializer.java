@@ -36,6 +36,12 @@ public class S2JSFPreferenceInitializer extends AbstractPreferenceInitializer {
 	private RGB SCRIPT       = new RGB(255,   0,   0);	
 	private RGB FOREGROUND   = new RGB(  0,   0,   0);
 	private RGB BACKGROUND   = new RGB(255, 255, 255);	
+	private RGB JS_KEYWORD   = new RGB(128,   0, 128);
+	private RGB JS_STRING    = new RGB(  0,   0, 255);
+	private RGB JS_COMMENT   = new RGB(  0, 128,   0);
+	private RGB CSS_SELECTOR = new RGB(  0,   0, 255);
+	private RGB CSS_STYLE    = new RGB(  0, 128,   0);
+	private RGB CSS_COMMENT  = new RGB(128,   0,   0);
 	
 	public void initializeDefaultPreferences() {
 		IPreferenceStore store = S2JSFPlugin.getDefault().getPreferenceStore();
@@ -58,6 +64,12 @@ public class S2JSFPreferenceInitializer extends AbstractPreferenceInitializer {
 		store.setDefault(S2JSFPlugin.PREF_COLOR_BG,StringConverter.asString(BACKGROUND));
 		store.setDefault(S2JSFPlugin.PREF_COLOR_FG,StringConverter.asString(FOREGROUND));
 		store.setDefault(S2JSFPlugin.PREF_PAIR_CHAR, true);
+		store.setDefault(S2JSFPlugin.PREF_COLOR_JS_KEYWORD,StringConverter.asString(JS_KEYWORD));
+		store.setDefault(S2JSFPlugin.PREF_COLOR_JS_STRING,StringConverter.asString(JS_STRING));
+		store.setDefault(S2JSFPlugin.PREF_COLOR_JS_COMMENT,StringConverter.asString(JS_COMMENT));
+		store.setDefault(S2JSFPlugin.PREF_COLOR_CSS_SELECTOR,StringConverter.asString(CSS_SELECTOR));
+		store.setDefault(S2JSFPlugin.PREF_COLOR_CSS_STYLE,StringConverter.asString(CSS_STYLE));
+		store.setDefault(S2JSFPlugin.PREF_COLOR_CSS_COMMENT,StringConverter.asString(CSS_COMMENT));
 	}
 
 }

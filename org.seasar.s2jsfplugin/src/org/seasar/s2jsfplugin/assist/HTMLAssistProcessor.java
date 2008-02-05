@@ -23,10 +23,12 @@ import java.util.List;
 import jp.aonir.fuzzyxml.FuzzyXMLAttribute;
 import jp.aonir.fuzzyxml.FuzzyXMLDocument;
 import jp.aonir.fuzzyxml.FuzzyXMLElement;
+import jp.aonir.fuzzyxml.FuzzyXMLNode;
 import jp.aonir.fuzzyxml.FuzzyXMLParser;
 import jp.aonir.fuzzyxml.XPath;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.CompletionProposal;
@@ -88,6 +90,9 @@ public class HTMLAssistProcessor extends HTMLTemplateAssistProcessor /*implement
 	
 	private S2JSFProject project = null;
 	private ManagedBean initBean = null;
+	
+	private FuzzyXMLDocument doc;
+	private IFile file;
 	
 	public HTMLAssistProcessor(){
 		tagImage    = S2JSFPlugin.getDefault().getImageRegistry().get(S2JSFPlugin.ICON_TAG);
@@ -180,6 +185,34 @@ public class HTMLAssistProcessor extends HTMLTemplateAssistProcessor /*implement
 		if(info.getAttributeType()==AttributeInfo.CSS){
 			return cssAssistProcessor.getAssistInfo(element.getName(),value);
 		}
+		// href="#..."
+		if(info.getAttributeName().equalsIgnoreCase("href") && value.startsWith("#")){
+			ArrayList list = new ArrayList();
+			String[] anchors = getAnchors(doc);
+			for(int i=0;i<anchors.length;i++){
+				list.add(new AssistInfo("#" + anchors[i], null));
+			}
+			return (AssistInfo[])list.toArray(new AssistInfo[list.size()]);
+		}
+		// href="file.html#..."
+		if(info.getAttributeName().equalsIgnoreCase("href") && value.indexOf("#") > 0){
+			ArrayList list = new ArrayList();
+			String fileName = value.substring(0, value.indexOf("#"));
+			if(this.file != null){
+				IFile targetFile = this.file.getParent().getFile(new Path(fileName));
+				if(targetFile!=null && targetFile.exists()){
+					try {
+						FuzzyXMLDocument doc = new FuzzyXMLParser().parse(targetFile.getContents());
+						String[] anchors = getAnchors(doc);
+						for(int i=0;i<anchors.length;i++){
+							list.add(new AssistInfo(fileName + "#" + anchors[i], "#" + anchors[i], null));
+						}
+					} catch(Exception ex){
+					}
+				}
+			}
+			return (AssistInfo[])list.toArray(new AssistInfo[list.size()]);
+		}
 		// FILE
 		if(info.getAttributeType()==AttributeInfo.FILE){
 			return fileAssistProcessor.getAssistInfo(value,false);
@@ -205,6 +238,39 @@ public class HTMLAssistProcessor extends HTMLTemplateAssistProcessor /*implement
 		}
 		return infos;
 	}
+	
+	/**
+	 * 引数で渡したドキュメントからアンカーを抽出します。
+	 * 
+	 * @param doc ドキュメント
+	 * @return アンカーのname属性の配列
+	 */
+	protected String[] getAnchors(FuzzyXMLDocument doc){
+		List list = new ArrayList();
+		if(doc!=null){
+			FuzzyXMLElement element = doc.getDocumentElement();
+			extractAnchor(element, list);
+		}
+		return (String[])list.toArray(new String[list.size()]);
+	}
+	
+	private void extractAnchor(FuzzyXMLElement element, List list){
+		if(element.getName().equalsIgnoreCase("a")){
+			FuzzyXMLAttribute[] attrs = element.getAttributes();
+			for(int i=0;i<attrs.length;i++){
+				if(attrs[i].getName().equalsIgnoreCase("name")){
+					list.add(attrs[i].getValue());
+				}
+			}
+		}
+		FuzzyXMLNode[] nodes = element.getChildren();
+		for(int i=0;i<nodes.length;i++){
+			if(nodes[i] instanceof FuzzyXMLElement){
+				extractAnchor((FuzzyXMLElement)nodes[i], list);
+			}
+		}
+	}
+
 	
 	/**
 	 * m:injectで指定可能なカスタムタグ名の補完情報を取得します。
@@ -469,7 +535,7 @@ public class HTMLAssistProcessor extends HTMLTemplateAssistProcessor /*implement
 		String   last = dim[2];
 		String   attr = dim[3];
 		
-		FuzzyXMLDocument doc = new FuzzyXMLParser().parse(text);
+		this.doc = new FuzzyXMLParser().parse(text);
 		FuzzyXMLElement element = null;
 		if(doc!=null){
 			// オフセット位置のエレメントを取得
@@ -702,6 +768,7 @@ public class HTMLAssistProcessor extends HTMLTemplateAssistProcessor /*implement
 	 */
 	public void update(S2JSFProject project,IFile file){
 		this.project = project;
+		this.file = file;
 		this.fileAssistProcessor.reload(file);
 		this.cssAssistProcessor.reload(file);
 	}

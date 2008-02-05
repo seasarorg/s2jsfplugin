@@ -80,6 +80,12 @@ public class S2JSFPlugin extends AbstractUIPlugin {
 	public static final String PREF_COLOR_BG      = "AbstractTextEditor.Color.Background";
 	public static final String PREF_COLOR_BG_DEF  = "AbstractTextEditor.Color.Background.SystemDefault";
 	public static final String PREF_COLOR_FG      = "__pref_color_foreground";
+	public static final String PREF_COLOR_JS_KEYWORD = "__pref_color_js_keyword";
+	public static final String PREF_COLOR_JS_STRING  = "__pref_color_js_string";
+	public static final String PREF_COLOR_JS_COMMENT = "__pref_color_js_comment";
+	public static final String PREF_COLOR_CSS_SELECTOR = "__pref_color_css_selector";
+	public static final String PREF_COLOR_CSS_STYLE    = "__pref_color_css_style";
+	public static final String PREF_COLOR_CSS_COMMENT  = "__pref_color_css_comment";
 //	public static final String PREF_COLOR_FG_DEF  = "AbstractTextEditor.Color.Foreground.SystemDefault";
 	public static final String PREF_PAIR_CHAR     = "__pref_pair_character";
 	
